@@ -16,18 +16,18 @@ Text.prototype = {
     constructor: Text,
 
     // 初始化
-    init: function () {
+    init: function() {
         // 绑定事件
         this._bindEvent()
     },
 
     // 清空内容
-    clear: function () {
+    clear: function() {
         this.html('<p><br></p>')
     },
 
     // 获取 设置 html
-    html: function (val) {
+    html: function(val) {
         const editor = this.editor
         const $textElem = editor.$textElem
         if (val == null) {
@@ -41,7 +41,7 @@ Text.prototype = {
     },
 
     // 获取 设置 text
-    text: function (val) {
+    text: function(val) {
         const editor = this.editor
         const $textElem = editor.$textElem
         if (val == null) {
@@ -55,7 +55,7 @@ Text.prototype = {
     },
 
     // 追加内容
-    append: function (html) {
+    append: function(html) {
         const editor = this.editor
         const $textElem = editor.$textElem
         $textElem.append($(html))
@@ -65,7 +65,7 @@ Text.prototype = {
     },
 
     // 绑定事件
-    _bindEvent: function () {
+    _bindEvent: function() {
         // 实时保存选取
         this._saveRangeRealTime()
 
@@ -89,7 +89,7 @@ Text.prototype = {
     },
 
     // 实时保存选取
-    _saveRangeRealTime: function () {
+    _saveRangeRealTime: function() {
         const editor = this.editor
         const $textElem = editor.$textElem
 
@@ -97,7 +97,7 @@ Text.prototype = {
         function saveRange(e) {
             // 随时保存选区
             editor.selection.saveRange()
-            // 更新按钮 ative 状态
+                // 更新按钮 ative 状态
             editor.menus.changeActive()
         }
         // 按键后保存
@@ -108,13 +108,13 @@ Text.prototype = {
         })
         $textElem.on('mouseup', e => {
             saveRange()
-            // 在编辑器区域之内完成点击，取消鼠标滑动到编辑区外面的事件
+                // 在编辑器区域之内完成点击，取消鼠标滑动到编辑区外面的事件
             $textElem.off('mouseleave', saveRange)
         })
     },
 
     // 按回车键时的特殊处理
-    _enterKeyHandle: function () {
+    _enterKeyHandle: function() {
         const editor = this.editor
         const $textElem = editor.$textElem
 
@@ -224,7 +224,7 @@ Text.prototype = {
     },
 
     // 清空时保留 <p><br></p>
-    _clearHandle: function () {
+    _clearHandle: function() {
         const editor = this.editor
         const $textElem = editor.$textElem
 
@@ -261,7 +261,7 @@ Text.prototype = {
     },
 
     // 粘贴事件（粘贴文字 粘贴图片）
-    _pasteHandle: function () {
+    _pasteHandle: function() {
         const editor = this.editor
         const config = editor.config
         const pasteFilterStyle = config.pasteFilterStyle
@@ -271,6 +271,7 @@ Text.prototype = {
         // 粘贴图片、文本的事件，每次只能执行一个
         // 判断该次粘贴事件是否可以执行
         let pasteTime = 0
+
         function canDo() {
             var now = Date.now()
             var flag = false
@@ -347,9 +348,9 @@ Text.prototype = {
             }
 
             // 粘贴图片和文本，只能同时使用一个
-            if (!canDo()) {
-                return
-            }
+            // if (!canDo()) {
+            //     return
+            // }
 
             // 获取粘贴的图片
             const pasteFiles = getPasteImgs(e)
@@ -376,7 +377,7 @@ Text.prototype = {
     },
 
     // tab 特殊处理
-    _tabHandle: function () {
+    _tabHandle: function() {
         const editor = this.editor
         const $textElem = editor.$textElem
 
@@ -410,12 +411,12 @@ Text.prototype = {
     },
 
     // img 点击
-    _imgHandle: function () {
+    _imgHandle: function() {
         const editor = this.editor
         const $textElem = editor.$textElem
 
         // 为图片增加 selected 样式
-        $textElem.on('click', 'img', function (e) {
+        $textElem.on('click', 'img', function(e) {
             const img = this
             const $img = $(img)
 
@@ -439,18 +440,18 @@ Text.prototype = {
     },
 
     // 拖拽事件
-    _dragHandle: function () {
+    _dragHandle: function() {
         const editor = this.editor
 
         // 禁用 document 拖拽事件
         const $document = $(document)
-        $document.on('dragleave drop dragenter dragover', function (e) {
+        $document.on('dragleave drop dragenter dragover', function(e) {
             e.preventDefault()
         })
 
         // 添加编辑区域拖拽事件
         const $textElem = editor.$textElem
-        $textElem.on('drop', function (e) {
+        $textElem.on('drop', function(e) {
             e.preventDefault()
             const files = e.dataTransfer && e.dataTransfer.files
             if (!files || !files.length) {
