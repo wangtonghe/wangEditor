@@ -272,18 +272,18 @@ Text.prototype = {
         // 判断该次粘贴事件是否可以执行
         let pasteTime = 0
 
-        function canDo() {
-            var now = Date.now()
-            var flag = false
-            if (now - pasteTime >= 500) {
-                // 间隔大于 500 ms ，可以执行
-                flag = true
-            }
-            pasteTime = now
-            return flag
-        }
+        // function canDo() {
+        //     var now = Date.now()
+        //     var flag = false
+        //     if (now - pasteTime >= 500) {
+        //         // 间隔大于 500 ms ，可以执行
+        //         flag = true
+        //     }
+        //     pasteTime = now
+        //     return flag
+        // }
 
-        // 粘贴文字
+        // 粘贴事件，有图片先粘贴图片，否则粘贴文本
         $textElem.on('paste', e => {
             if (UA.isIE()) {
                 return
@@ -292,87 +292,59 @@ Text.prototype = {
                 e.preventDefault()
             }
 
-            // 粘贴图片和文本，只能同时使用一个
-            if (!canDo()) {
-                return
-            }
-
-            // 获取粘贴的文字
-            let pasteHtml = getPasteHtml(e, pasteFilterStyle)
-            let pasteText = getPasteText(e)
-            pasteText = pasteText.replace(/\n/gm, '<br>')
-
-            // 自定义处理粘贴的内容
-            if (pasteTextHandle && typeof pasteTextHandle === 'function') {
-                pasteHtml = '' + (pasteTextHandle(pasteHtml) || '')
-                pasteText = '' + (pasteTextHandle(pasteText) || '')
-            }
-
-            const $selectionElem = editor.selection.getSelectionContainerElem()
-            if (!$selectionElem) {
-                return
-            }
-            const nodeName = $selectionElem.getNodeName()
-
-            // code 中只能粘贴纯文本
-            if (nodeName === 'CODE' || nodeName === 'PRE') {
-                editor.cmd.do('insertHTML', `<p>${pasteText}</p>`)
-                return
-            }
-
-            // 先放开注释，有问题再追查 ————
-            // // 表格中忽略，可能会出现异常问题
-            // if (nodeName === 'TD' || nodeName === 'TH') {
-            //     return
-            // }
-
-            if (!pasteHtml) {
-                return
-            }
-            try {
-                // firefox 中，获取的 pasteHtml 可能是没有 <ul> 包裹的 <li>
-                // 因此执行 insertHTML 会报错
-                editor.cmd.do('insertHTML', pasteHtml)
-            } catch (ex) {
-                // 此时使用 pasteText 来兼容一下
-                editor.cmd.do('insertHTML', `<p>${pasteText}</p>`)
-            }
-        })
-
-        // 粘贴图片
-        $textElem.on('paste', e => {
-            if (UA.isIE()) {
-                return
-            } else {
-                e.preventDefault()
-            }
-
-            // 粘贴图片和文本，只能同时使用一个
-            // if (!canDo()) {
-            //     return
-            // }
-
-            // 获取粘贴的图片
             const pasteFiles = getPasteImgs(e)
-            if (!pasteFiles || !pasteFiles.length) {
-                return
-            }
+            if (pasteFiles.length > 0) { //粘贴图片
+                // 获取当前的元素
+                const $selectionElem = editor.selection.getSelectionContainerElem()
+                if (!$selectionElem) {
+                    return
+                }
+                const nodeName = $selectionElem.getNodeName()
 
-            // 获取当前的元素
-            const $selectionElem = editor.selection.getSelectionContainerElem()
-            if (!$selectionElem) {
-                return
-            }
-            const nodeName = $selectionElem.getNodeName()
+                // code 中粘贴忽略
+                if (nodeName === 'CODE' || nodeName === 'PRE') {
+                    return
+                }
+                // 上传图片
+                const uploadImg = editor.uploadImg
+                uploadImg.uploadImg(pasteFiles)
 
-            // code 中粘贴忽略
-            if (nodeName === 'CODE' || nodeName === 'PRE') {
-                return
-            }
+            } else { //粘贴文本
+                // 获取粘贴的文字
+                let pasteHtml = getPasteHtml(e, pasteFilterStyle)
+                let pasteText = getPasteText(e)
+                pasteText = pasteText.replace(/\n/gm, '<br>')
 
-            // 上传图片
-            const uploadImg = editor.uploadImg
-            uploadImg.uploadImg(pasteFiles)
+                // 自定义处理粘贴的内容
+                if (pasteTextHandle && typeof pasteTextHandle === 'function') {
+                    pasteHtml = '' + (pasteTextHandle(pasteHtml) || '')
+                    pasteText = '' + (pasteTextHandle(pasteText) || '')
+                }
+
+                const $selectionElem = editor.selection.getSelectionContainerElem()
+                if (!$selectionElem) {
+                    return
+                }
+                const nodeName = $selectionElem.getNodeName()
+
+                // code 中只能粘贴纯文本
+                if (nodeName === 'CODE' || nodeName === 'PRE') {
+                    editor.cmd.do('insertHTML', `<p>${pasteText}</p>`)
+                    return
+                }
+
+                if (!pasteHtml) {
+                    return
+                }
+                try {
+                    // firefox 中，获取的 pasteHtml 可能是没有 <ul> 包裹的 <li>
+                    // 因此执行 insertHTML 会报错
+                    editor.cmd.do('insertHTML', pasteHtml)
+                } catch (ex) {
+                    // 此时使用 pasteText 来兼容一下
+                    editor.cmd.do('insertHTML', `<p>${pasteText}</p>`)
+                }
+            }
         })
     },
 

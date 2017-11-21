@@ -49,3 +49,85 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+Skip to content
+This repository
+Search
+Pull requests
+Issues
+Marketplace
+Explore
+ @wangtonghe
+ Sign out
+ Unwatch 1
+  Star 0  Fork 898 wangtonghe/wangEditor
+forked from wangfupeng1988/wangEditor
+ Code  Pull requests 0  Projects 0  Wiki  Insights  Settings
+Branch: master Find file Copy pathwangEditor/.gitignore
+b582c41  on 16 Jul
+@wangfupeng1988 wangfupeng1988 v3.0.4
+1 contributor
+RawBlameHistory     
+52 lines (38 sloc)  660 Bytes
+
+#忽略
+**/node_modules/*
+node_modules/*
+npm-debug.log
+example/upload-files
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# =========================
+# Operating System Files
+# =========================
+
+# OSX
+# =========================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+© 2017 GitHub, Inc.
+Terms
+Privacy
+Security
+Status
+Help
+Contact GitHub
+API
+Training
+Shop
+Blog
+About

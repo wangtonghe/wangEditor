@@ -627,7 +627,10 @@ var config = {
     },
 
     // 是否上传七牛云，默认为 false
-    qiniu: false
+    qiniu: false,
+
+    //是否手动配置上传
+    manualUpload: false
 
     // 上传图片自定义提示方法
     // customAlert: function (info) {
@@ -2443,13 +2446,16 @@ Video.prototype = {
 /*
     menu - img
 */
+var upFileId = getRandom('up-file');
+
 // 构造函数
 function Image(editor) {
     this.editor = editor;
     var imgMenuId = getRandom('w-e-img');
-    this.$elem = $('<div class="w-e-menu" id="' + imgMenuId + '"><i class="w-e-icon-image"><i/></div>');
+
+    this.$elem = $('<div class="w-e-menu" id="' + imgMenuId + '"><i class="w-e-icon-image"></i><div style="display:none"><input style="opacity: 0;" id="' + upFileId + '" type="file" accept="image/jpg,image/jpeg,image/png,image/gif,image/bmp" ></input></div></div>');
     editor.imgMenuId = imgMenuId;
-    this.type = 'panel';
+    this.type = 'image';
 
     // 当前是否 active 状态
     this._active = false;
@@ -2458,184 +2464,233 @@ function Image(editor) {
 // 原型
 Image.prototype = {
     constructor: Image,
-
     onClick: function onClick() {
         var editor = this.editor;
         var config = editor.config;
+        var uploadImg = editor.uploadImg;
+
         if (config.qiniu) {
             return;
         }
-        if (this._active) {
-            this._createEditPanel();
-        } else {
-            this._createInsertPanel();
+        if (config.manualUpload && typeof config.manualUpload === 'function') {
+            //是否手动上传，若手动上传，可结合其他上传组件
+            config.manualUpload();
+            return;
         }
-    },
+        var upload = document.getElementById(upFileId);
+        $(upload).on('change', function () {
+            var $file = $('#' + upFileId);
+            var fileElem = $file[0];
 
-    _createEditPanel: function _createEditPanel() {
-        var editor = this.editor;
-
-        // id
-        var width30 = getRandom('width-30');
-        var width50 = getRandom('width-50');
-        var width100 = getRandom('width-100');
-        var delBtn = getRandom('del-btn');
-
-        // tab 配置
-        var tabsConfig = [{
-            title: '编辑图片',
-            tpl: '<div>\n                    <div class="w-e-button-container" style="border-bottom:1px solid #f1f1f1;padding-bottom:5px;margin-bottom:5px;">\n                        <span style="float:left;font-size:14px;margin:4px 5px 0 5px;color:#333;">\u6700\u5927\u5BBD\u5EA6\uFF1A</span>\n                        <button id="' + width30 + '" class="left">30%</button>\n                        <button id="' + width50 + '" class="left">50%</button>\n                        <button id="' + width100 + '" class="left">100%</button>\n                    </div>\n                    <div class="w-e-button-container">\n                        <button id="' + delBtn + '" class="gray left">\u5220\u9664\u56FE\u7247</button>\n                    </dv>\n                </div>',
-            events: [{
-                selector: '#' + width30,
-                type: 'click',
-                fn: function fn() {
-                    var $img = editor._selectedImg;
-                    if ($img) {
-                        $img.css('max-width', '30%');
-                    }
-                    // 返回 true，表示该事件执行完之后，panel 要关闭。否则 panel 不会关闭
-                    return true;
-                }
-            }, {
-                selector: '#' + width50,
-                type: 'click',
-                fn: function fn() {
-                    var $img = editor._selectedImg;
-                    if ($img) {
-                        $img.css('max-width', '50%');
-                    }
-                    // 返回 true，表示该事件执行完之后，panel 要关闭。否则 panel 不会关闭
-                    return true;
-                }
-            }, {
-                selector: '#' + width100,
-                type: 'click',
-                fn: function fn() {
-                    var $img = editor._selectedImg;
-                    if ($img) {
-                        $img.css('max-width', '100%');
-                    }
-                    // 返回 true，表示该事件执行完之后，panel 要关闭。否则 panel 不会关闭
-                    return true;
-                }
-            }, {
-                selector: '#' + delBtn,
-                type: 'click',
-                fn: function fn() {
-                    var $img = editor._selectedImg;
-                    if ($img) {
-                        $img.remove();
-                    }
-                    // 返回 true，表示该事件执行完之后，panel 要关闭。否则 panel 不会关闭
-                    return true;
-                }
-            }]
-        }];
-
-        // 创建 panel 并显示
-        var panel = new Panel(this, {
-            width: 300,
-            tabs: tabsConfig
+            // 获取选中的 file 对象列表
+            var fileList = fileElem.files;
+            if (fileList.length) {
+                uploadImg.uploadImg(fileList);
+            }
         });
-        panel.show();
-
-        // 记录属性
-        this.panel = panel;
+        upload.click();
     },
 
-    _createInsertPanel: function _createInsertPanel() {
-        var editor = this.editor;
-        var uploadImg = editor.uploadImg;
-        var config = editor.config;
+    // _createEditPanel: function () {
+    //     const editor = this.editor
 
-        // id
-        var upTriggerId = getRandom('up-trigger');
-        var upFileId = getRandom('up-file');
-        var linkUrlId = getRandom('link-url');
-        var linkBtnId = getRandom('link-btn');
+    //     // id
+    //     const width30 = getRandom('width-30')
+    //     const width50 = getRandom('width-50')
+    //     const width100 = getRandom('width-100')
+    //     const delBtn = getRandom('del-btn')
 
-        // tabs 的配置
-        var tabsConfig = [{
-            title: '上传图片',
-            tpl: '<div class="w-e-up-img-container">\n                    <div id="' + upTriggerId + '" class="w-e-up-btn">\n                        <i class="w-e-icon-upload2"></i>\n                    </div>\n                    <div style="display:none;">\n                        <input id="' + upFileId + '" type="file" multiple="multiple" accept="image/jpg,image/jpeg,image/png,image/gif,image/bmp"/>\n                    </div>\n                </div>',
-            events: [{
-                // 触发选择图片
-                selector: '#' + upTriggerId,
-                type: 'click',
-                fn: function fn() {
-                    var $file = $('#' + upFileId);
-                    var fileElem = $file[0];
-                    if (fileElem) {
-                        fileElem.click();
-                    } else {
-                        // 返回 true 可关闭 panel
-                        return true;
-                    }
-                }
-            }, {
-                // 选择图片完毕
-                selector: '#' + upFileId,
-                type: 'change',
-                fn: function fn() {
-                    var $file = $('#' + upFileId);
-                    var fileElem = $file[0];
-                    if (!fileElem) {
-                        // 返回 true 可关闭 panel
-                        return true;
-                    }
+    //     // tab 配置
+    //     const tabsConfig = [
+    //         {
+    //             title: '编辑图片',
+    //             tpl: `<div>
+    //                 <div class="w-e-button-container" style="border-bottom:1px solid #f1f1f1;padding-bottom:5px;margin-bottom:5px;">
+    //                     <span style="float:left;font-size:14px;margin:4px 5px 0 5px;color:#333;">最大宽度：</span>
+    //                     <button id="${width30}" class="left">30%</button>
+    //                     <button id="${width50}" class="left">50%</button>
+    //                     <button id="${width100}" class="left">100%</button>
+    //                 </div>
+    //                 <div class="w-e-button-container">
+    //                     <button id="${delBtn}" class="gray left">删除图片</button>
+    //                 </dv>
+    //             </div>`,
+    //             events: [
+    //                 {
+    //                     selector: '#' + width30,
+    //                     type: 'click',
+    //                     fn: () => {
+    //                         const $img = editor._selectedImg
+    //                         if ($img) {
+    //                             $img.css('max-width', '30%')
+    //                         }
+    //                         // 返回 true，表示该事件执行完之后，panel 要关闭。否则 panel 不会关闭
+    //                         return true
+    //                     }
+    //                 },
+    //                 {
+    //                     selector: '#' + width50,
+    //                     type: 'click',
+    //                     fn: () => {
+    //                         const $img = editor._selectedImg
+    //                         if ($img) {
+    //                             $img.css('max-width', '50%')
+    //                         }
+    //                         // 返回 true，表示该事件执行完之后，panel 要关闭。否则 panel 不会关闭
+    //                         return true
+    //                     }
+    //                 },
+    //                 {
+    //                     selector: '#' + width100,
+    //                     type: 'click',
+    //                     fn: () => {
+    //                         const $img = editor._selectedImg
+    //                         if ($img) {
+    //                             $img.css('max-width', '100%')
+    //                         }
+    //                         // 返回 true，表示该事件执行完之后，panel 要关闭。否则 panel 不会关闭
+    //                         return true
+    //                     }
+    //                 },
+    //                 {
+    //                     selector: '#' + delBtn,
+    //                     type: 'click',
+    //                     fn: () => {
+    //                         const $img = editor._selectedImg
+    //                         if ($img) {
+    //                             $img.remove()
+    //                         }
+    //                         // 返回 true，表示该事件执行完之后，panel 要关闭。否则 panel 不会关闭
+    //                         return true
+    //                     }
+    //                 }
+    //             ]
+    //         }
+    //     ]
 
-                    // 获取选中的 file 对象列表
-                    var fileList = fileElem.files;
-                    if (fileList.length) {
-                        uploadImg.uploadImg(fileList);
-                    }
+    //     // 创建 panel 并显示
+    //     const panel = new Panel(this, {
+    //         width: 300,
+    //         tabs: tabsConfig
+    //     })
+    //     panel.show()
 
-                    // 返回 true 可关闭 panel
-                    return true;
-                }
-            }]
-        }, // first tab end
-        {
-            title: '网络图片',
-            tpl: '<div>\n                    <input id="' + linkUrlId + '" type="text" class="block" placeholder="\u56FE\u7247\u94FE\u63A5"/></td>\n                    <div class="w-e-button-container">\n                        <button id="' + linkBtnId + '" class="right">\u63D2\u5165</button>\n                    </div>\n                </div>',
-            events: [{
-                selector: '#' + linkBtnId,
-                type: 'click',
-                fn: function fn() {
-                    var $linkUrl = $('#' + linkUrlId);
-                    var url = $linkUrl.val().trim();
+    //     // 记录属性
+    //     this.panel = panel
+    // },
 
-                    if (url) {
-                        uploadImg.insertLinkImg(url);
-                    }
+    // _createInsertPanel: function () {
+    //     const editor = this.editor
+    //     const uploadImg = editor.uploadImg
+    //     const config = editor.config
 
-                    // 返回 true 表示函数执行结束之后关闭 panel
-                    return true;
-                }
-            }] // second tab end
-        }]; // tabs end
+    //     // id
+    //     const upTriggerId = getRandom('up-trigger')
+    //     const upFileId = getRandom('up-file')
+    //     const linkUrlId = getRandom('link-url')
+    //     const linkBtnId = getRandom('link-btn')
 
-        // 判断 tabs 的显示
-        var tabsConfigResult = [];
-        if ((config.uploadImgShowBase64 || config.uploadImgServer || config.customUploadImg) && window.FileReader) {
-            // 显示“上传图片”
-            tabsConfigResult.push(tabsConfig[0]);
-        }
-        if (config.showLinkImg) {
-            // 显示“网络图片”
-            tabsConfigResult.push(tabsConfig[1]);
-        }
+    //     // tabs 的配置
+    //     const tabsConfig = [
+    //         {
+    //             title: '上传图片',
+    //             tpl: `<div class="w-e-up-img-container">
+    //                 <div id="${upTriggerId}" class="w-e-up-btn">
+    //                     <i class="w-e-icon-upload2"></i>
+    //                 </div>
+    //                 <div style="display:none;">
+    //                     <input id="${upFileId}" type="file" multiple="multiple" accept="image/jpg,image/jpeg,image/png,image/gif,image/bmp"/>
+    //                 </div>
+    //             </div>`,
+    //             events: [
+    //                 {
+    //                     // 触发选择图片
+    //                     selector: '#' + upTriggerId,
+    //                     type: 'click',
+    //                     fn: () => {
+    //                         const $file = $('#' + upFileId)
+    //                         const fileElem = $file[0]
+    //                         if (fileElem) {
+    //                             fileElem.click()
+    //                         } else {
+    //                             // 返回 true 可关闭 panel
+    //                             return true
+    //                         }
+    //                     }
+    //                 },
+    //                 {
+    //                     // 选择图片完毕
+    //                     selector: '#' + upFileId,
+    //                     type: 'change',
+    //                     fn: () => {
+    //                         const $file = $('#' + upFileId)
+    //                         const fileElem = $file[0]
+    //                         if (!fileElem) {
+    //                             // 返回 true 可关闭 panel
+    //                             return true
+    //                         }
 
-        // 创建 panel 并显示
-        var panel = new Panel(this, {
-            width: 300,
-            tabs: tabsConfigResult
-        });
-        panel.show();
+    //                         // 获取选中的 file 对象列表
+    //                         const fileList = fileElem.files
+    //                         if (fileList.length) {
+    //                             uploadImg.uploadImg(fileList)
+    //                         }
 
-        // 记录属性
-        this.panel = panel;
-    },
+    //                         // 返回 true 可关闭 panel
+    //                         return true
+    //                     }
+    //                 }
+    //             ]
+    //         }, // first tab end
+    //         {
+    //             title: '网络图片',
+    //             tpl: `<div>
+    //                 <input id="${linkUrlId}" type="text" class="block" placeholder="图片链接"/></td>
+    //                 <div class="w-e-button-container">
+    //                     <button id="${linkBtnId}" class="right">插入</button>
+    //                 </div>
+    //             </div>`,
+    //             events: [
+    //                 {
+    //                     selector: '#' + linkBtnId,
+    //                     type: 'click',
+    //                     fn: () => {
+    //                         const $linkUrl = $('#' + linkUrlId)
+    //                         const url = $linkUrl.val().trim()
+
+    //                         if (url) {
+    //                             uploadImg.insertLinkImg(url)
+    //                         }
+
+    //                         // 返回 true 表示函数执行结束之后关闭 panel
+    //                         return true
+    //                     }
+    //                 }
+    //             ]
+    //         } // second tab end
+    //     ] // tabs end
+
+    //     // 判断 tabs 的显示
+    //     const tabsConfigResult = []
+    //     if ((config.uploadImgShowBase64 || config.uploadImgServer || config.customUploadImg) && window.FileReader) {
+    //         // 显示“上传图片”
+    //         tabsConfigResult.push(tabsConfig[0])
+    //     }
+    //     if (config.showLinkImg) {
+    //         // 显示“网络图片”
+    //         tabsConfigResult.push(tabsConfig[1])
+    //     }
+
+    //     // 创建 panel 并显示
+    //     const panel = new Panel(this, {
+    //         width: 300,
+    //         tabs: tabsConfigResult
+    //     })
+    //     panel.show()
+
+    //     // 记录属性
+    //     this.panel = panel
+    // },
 
     // 试图改变 active 状态
     tryChangeActive: function tryChangeActive(e) {
@@ -2801,6 +2856,17 @@ Menus.prototype = {
                     menu.onClick(e);
                 });
             }
+            if (type === 'image' && menu.onClick) {
+                $elem.on('click', function (e) {
+                    console.log('e:' + e);
+                    e.stopPropagation();
+                    if (editor.selection.getRange() == null) {
+                        return;
+                    }
+                    // 在自定义事件中显示 panel
+                    menu.onClick(e);
+                });
+            }
         });
     },
 
@@ -2877,12 +2943,6 @@ function getPasteHtml(e, filterStyle) {
 // 获取粘贴的图片文件
 function getPasteImgs(e) {
     var result = [];
-    var txt = getPasteText(e);
-    if (txt) {
-        // 有文字，就忽略图片
-        return result;
-    }
-
     var clipboardData = e.clipboardData || e.originalEvent && e.originalEvent.clipboardData || {};
     var items = clipboardData.items;
     if (!items) {
@@ -3168,18 +3228,18 @@ Text.prototype = {
         // 判断该次粘贴事件是否可以执行
         var pasteTime = 0;
 
-        function canDo() {
-            var now = Date.now();
-            var flag = false;
-            if (now - pasteTime >= 500) {
-                // 间隔大于 500 ms ，可以执行
-                flag = true;
-            }
-            pasteTime = now;
-            return flag;
-        }
+        // function canDo() {
+        //     var now = Date.now()
+        //     var flag = false
+        //     if (now - pasteTime >= 500) {
+        //         // 间隔大于 500 ms ，可以执行
+        //         flag = true
+        //     }
+        //     pasteTime = now
+        //     return flag
+        // }
 
-        // 粘贴文字
+        // 粘贴事件，有图片先粘贴图片，否则粘贴文本
         $textElem.on('paste', function (e) {
             if (UA.isIE()) {
                 return;
@@ -3188,87 +3248,60 @@ Text.prototype = {
                 e.preventDefault();
             }
 
-            // 粘贴图片和文本，只能同时使用一个
-            if (!canDo()) {
-                return;
-            }
-
-            // 获取粘贴的文字
-            var pasteHtml = getPasteHtml(e, pasteFilterStyle);
-            var pasteText = getPasteText(e);
-            pasteText = pasteText.replace(/\n/gm, '<br>');
-
-            // 自定义处理粘贴的内容
-            if (pasteTextHandle && typeof pasteTextHandle === 'function') {
-                pasteHtml = '' + (pasteTextHandle(pasteHtml) || '');
-                pasteText = '' + (pasteTextHandle(pasteText) || '');
-            }
-
-            var $selectionElem = editor.selection.getSelectionContainerElem();
-            if (!$selectionElem) {
-                return;
-            }
-            var nodeName = $selectionElem.getNodeName();
-
-            // code 中只能粘贴纯文本
-            if (nodeName === 'CODE' || nodeName === 'PRE') {
-                editor.cmd.do('insertHTML', '<p>' + pasteText + '</p>');
-                return;
-            }
-
-            // 先放开注释，有问题再追查 ————
-            // // 表格中忽略，可能会出现异常问题
-            // if (nodeName === 'TD' || nodeName === 'TH') {
-            //     return
-            // }
-
-            if (!pasteHtml) {
-                return;
-            }
-            try {
-                // firefox 中，获取的 pasteHtml 可能是没有 <ul> 包裹的 <li>
-                // 因此执行 insertHTML 会报错
-                editor.cmd.do('insertHTML', pasteHtml);
-            } catch (ex) {
-                // 此时使用 pasteText 来兼容一下
-                editor.cmd.do('insertHTML', '<p>' + pasteText + '</p>');
-            }
-        });
-
-        // 粘贴图片
-        $textElem.on('paste', function (e) {
-            if (UA.isIE()) {
-                return;
-            } else {
-                e.preventDefault();
-            }
-
-            // 粘贴图片和文本，只能同时使用一个
-            // if (!canDo()) {
-            //     return
-            // }
-
-            // 获取粘贴的图片
             var pasteFiles = getPasteImgs(e);
-            if (!pasteFiles || !pasteFiles.length) {
-                return;
-            }
+            if (pasteFiles.length > 0) {
+                //粘贴图片
+                // 获取当前的元素
+                var $selectionElem = editor.selection.getSelectionContainerElem();
+                if (!$selectionElem) {
+                    return;
+                }
+                var nodeName = $selectionElem.getNodeName();
 
-            // 获取当前的元素
-            var $selectionElem = editor.selection.getSelectionContainerElem();
-            if (!$selectionElem) {
-                return;
-            }
-            var nodeName = $selectionElem.getNodeName();
+                // code 中粘贴忽略
+                if (nodeName === 'CODE' || nodeName === 'PRE') {
+                    return;
+                }
+                // 上传图片
+                var uploadImg = editor.uploadImg;
+                uploadImg.uploadImg(pasteFiles);
+            } else {
+                //粘贴文本
+                // 获取粘贴的文字
+                var pasteHtml = getPasteHtml(e, pasteFilterStyle);
+                var pasteText = getPasteText(e);
+                pasteText = pasteText.replace(/\n/gm, '<br>');
 
-            // code 中粘贴忽略
-            if (nodeName === 'CODE' || nodeName === 'PRE') {
-                return;
-            }
+                // 自定义处理粘贴的内容
+                if (pasteTextHandle && typeof pasteTextHandle === 'function') {
+                    pasteHtml = '' + (pasteTextHandle(pasteHtml) || '');
+                    pasteText = '' + (pasteTextHandle(pasteText) || '');
+                }
 
-            // 上传图片
-            var uploadImg = editor.uploadImg;
-            uploadImg.uploadImg(pasteFiles);
+                var _$selectionElem = editor.selection.getSelectionContainerElem();
+                if (!_$selectionElem) {
+                    return;
+                }
+                var _nodeName = _$selectionElem.getNodeName();
+
+                // code 中只能粘贴纯文本
+                if (_nodeName === 'CODE' || _nodeName === 'PRE') {
+                    editor.cmd.do('insertHTML', '<p>' + pasteText + '</p>');
+                    return;
+                }
+
+                if (!pasteHtml) {
+                    return;
+                }
+                try {
+                    // firefox 中，获取的 pasteHtml 可能是没有 <ul> 包裹的 <li>
+                    // 因此执行 insertHTML 会报错
+                    editor.cmd.do('insertHTML', pasteHtml);
+                } catch (ex) {
+                    // 此时使用 pasteText 来兼容一下
+                    editor.cmd.do('insertHTML', '<p>' + pasteText + '</p>');
+                }
+            }
         });
     },
 
@@ -4314,6 +4347,9 @@ Editor.prototype = {
 
         // 绑定事件
         this._bindEvent();
+    },
+    insertFile: function insertFile(imgLink) {
+        this.uploadImg.insertLinkImg(imgLink);
     }
 };
 

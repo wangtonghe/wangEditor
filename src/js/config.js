@@ -43,18 +43,18 @@ const config = {
     debug: false,
 
     // 插入链接时候的格式校验
-    linkCheck: function (text, link) {
+    linkCheck: function(text, link) {
         // text 是插入的文字
         // link 是插入的链接
         return true // 返回 true 即表示成功
-        // return '校验失败' // 返回字符串即表示失败的提示信息
+            // return '校验失败' // 返回字符串即表示失败的提示信息
     },
 
     // 插入网络图片的校验
-    linkImgCheck: function (src) {
+    linkImgCheck: function(src) {
         // src 即图片的地址
         return true // 返回 true 即表示成功
-        // return '校验失败'  // 返回字符串即表示失败的提示信息
+            // return '校验失败'  // 返回字符串即表示失败的提示信息
     },
 
     // 粘贴过滤样式，默认开启
@@ -62,7 +62,7 @@ const config = {
 
     // 对粘贴的文字进行自定义处理，返回处理后的结果。编辑器会将处理后的结果粘贴到编辑区域中。
     // IE 暂时不支持
-    pasteTextHandle: function (content) {
+    pasteTextHandle: function(content) {
         // content 即粘贴过来的内容（html 或 纯文本），可进行自定义处理然后返回
         return content
     },
@@ -77,7 +77,7 @@ const config = {
     showLinkImg: true,
 
     // 插入网络图片的回调
-    linkImgCallback: function (url) {
+    linkImgCallback: function(url) {
         // console.log(url)  // url 即插入图片的地址
     },
 
@@ -122,7 +122,7 @@ const config = {
         //         insertLinkImg(link)
         //     })
         // },
-        before: function (xhr, editor, files) {
+        before: function(xhr, editor, files) {
             // 图片上传之前触发
 
             // 如果返回的结果是 {prevent: true, msg: 'xxxx'} 则表示用户放弃上传
@@ -131,16 +131,16 @@ const config = {
             //     msg: '放弃上传'
             // }
         },
-        success: function (xhr, editor, result) {
+        success: function(xhr, editor, result) {
             // 图片上传并返回结果，图片插入成功之后触发
         },
-        fail: function (xhr, editor, result) {
+        fail: function(xhr, editor, result) {
             // 图片上传并返回结果，但图片插入错误时触发
         },
-        error: function (xhr, editor) {
+        error: function(xhr, editor) {
             // 图片上传出错时触发
         },
-        timeout: function (xhr, editor) {
+        timeout: function(xhr, editor) {
             // 图片上传超时时触发
         }
     },
@@ -148,11 +148,14 @@ const config = {
     // 是否上传七牛云，默认为 false
     qiniu: false,
 
+    //是否手动配置上传
+    manualUpload: false
+
     // 上传图片自定义提示方法
     // customAlert: function (info) {
     //     // 自定义上传提示
     // },
-    
+
     // // 自定义上传图片
     // customUploadImg: function (files, insert) {
     //     // files 是 input 中选中的文件列表

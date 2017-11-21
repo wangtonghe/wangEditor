@@ -44,7 +44,7 @@ export function getPasteHtml(e, filterStyle) {
 
     // 过滤无用标签
     pasteHtml = pasteHtml.replace(/<(meta|script|link).+?>/igm, '')
-    // 去掉注释
+        // 去掉注释
     pasteHtml = pasteHtml.replace(/<!--.*?-->/mg, '')
 
     if (filterStyle) {
@@ -61,12 +61,6 @@ export function getPasteHtml(e, filterStyle) {
 // 获取粘贴的图片文件
 export function getPasteImgs(e) {
     const result = []
-    const txt = getPasteText(e)
-    if (txt) {
-        // 有文字，就忽略图片
-        return result
-    }
-
     const clipboardData = e.clipboardData || (e.originalEvent && e.originalEvent.clipboardData) || {}
     const items = clipboardData.items
     if (!items) {
