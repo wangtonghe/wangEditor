@@ -37,7 +37,7 @@ const config = {
     // },
 
     // 编辑区域的 z-index
-    zIndex: 10000,
+    zIndex: 999,
 
     // 是否开启 debug 模式（debug 模式下错误会 throw error 形式抛出）
     debug: false,
@@ -82,7 +82,7 @@ const config = {
     },
 
     // 默认上传图片 max size: 5M
-    uploadImgMaxSize: 5 * 1024 * 1024,
+    uploadImgMaxSize: 10 * 1024 * 1024,
 
     // 配置一次最多上传几个图片
     // uploadImgMaxLength: 5,
