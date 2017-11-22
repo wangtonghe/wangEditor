@@ -45,8 +45,10 @@ Image.prototype = {
                 uploadImg.uploadImg(fileList)
             }
         })
+        $(upload).on('click', function(e) {
+            e.stopPropagation()
+        })
         upload.click()
-
     },
 
     // _createEditPanel: function () {
