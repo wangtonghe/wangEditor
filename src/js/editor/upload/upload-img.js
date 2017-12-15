@@ -116,9 +116,8 @@ UploadImg.prototype = {
         arrForEach(files, file => {
             var name = file.name
             var size = file.size
-
-            // chrome 低版本 name === undefined
-            if (!name || !size) {
+           
+            if (!name ) {
                 return
             }
 
