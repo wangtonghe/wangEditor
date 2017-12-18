@@ -22,7 +22,7 @@ function Editor(toolbarSelector, textSelector) {
         throw new Error('错误：初始化编辑器时候未传入任何参数，请查阅文档')
     }
     // id，用以区分单个页面不同的编辑器对象
-    this.id = 'wangEditor-' + (editorId++)
+    this.id = 'zingEditor-' + (editorId++)
 
     this.toolbarSelector = toolbarSelector
     this.textSelector = textSelector
