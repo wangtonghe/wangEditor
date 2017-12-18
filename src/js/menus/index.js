@@ -15,7 +15,7 @@ Menus.prototype = {
     constructor: Menus,
 
     // 初始化菜单
-    init: function() {
+    init: function () {
         const editor = this.editor
         const config = editor.config || {}
         const configMenus = config.menus || [] // 获取配置中的菜单
@@ -37,12 +37,12 @@ Menus.prototype = {
     },
 
     // 添加到菜单栏
-    _addToToolbar: function() {
+    _addToToolbar: function () {
         const editor = this.editor
         const $toolbarElem = editor.$toolbarElem
         const menus = this.menus
         const config = editor.config
-            // config.zIndex 是配置的编辑区域的 z-index，菜单的 z-index 得在其基础上 +1
+        // config.zIndex 是配置的编辑区域的 z-index，菜单的 z-index 得在其基础上 +1
         const zIndex = config.zIndex + 1
         objForEach(menus, (key, menu) => {
             const $elem = menu.$elem
@@ -55,7 +55,7 @@ Menus.prototype = {
     },
 
     // 绑定菜单 click mouseenter 事件
-    _bindEvent: function() {
+    _bindEvent: function () {
         const menus = this.menus
         const editor = this.editor
         objForEach(menus, (key, menu) => {
@@ -108,20 +108,22 @@ Menus.prototype = {
             }
             if (type === 'image' && menu.onClick) {
                 $elem.on('click', e => {
-                    console.log('e:' + e)
+                    console.log(e.target.tagName)
                     e.stopPropagation()
                     if (editor.selection.getRange() == null) {
                         return
                     }
-                    // 在自定义事件中显示 panel
-                    menu.onClick(e)
+                    // 在自定义事件中显示 image
+                    if (e && e.target.tagName === 'I') {
+                        menu.onClick(e)
+                    }
                 })
             }
         })
     },
 
     // 尝试修改菜单状态
-    changeActive: function() {
+    changeActive: function () {
         const menus = this.menus
         objForEach(menus, (key, menu) => {
             if (menu.tryChangeActive) {

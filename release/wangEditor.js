@@ -2452,7 +2452,6 @@ var upFileId = getRandom('up-file');
 function Image(editor) {
     this.editor = editor;
     var imgMenuId = getRandom('w-e-img');
-
     this.$elem = $('<div class="w-e-menu" id="' + imgMenuId + '"><i class="w-e-icon-image"></i><div style="display:none"><input style="opacity: 0;" id="' + upFileId + '" type="file" accept="image/jpg,image/jpeg,image/png,image/gif,image/bmp" ></input></div></div>');
     editor.imgMenuId = imgMenuId;
     this.type = 'image';
@@ -2477,8 +2476,9 @@ Image.prototype = {
             config.manualUpload();
             return;
         }
-        var upload = document.getElementById(upFileId);
-        $(upload).on('change', function () {
+        var oldUploadId = upFileId;
+        $('#' + oldUploadId).on('change', function (e) {
+            console.log('change e:' + JSON.stringify(e));
             var $file = $('#' + upFileId);
             var fileElem = $file[0];
 
@@ -2487,11 +2487,10 @@ Image.prototype = {
             if (fileList.length) {
                 uploadImg.uploadImg(fileList);
             }
+            upFileId = getRandom('up-file');
+            $(this).off('change').html('<input style="opacity: 0;" id="' + upFileId + '" type="file" accept="image/jpg,image/jpeg,image/png,image/gif,image/bmp" ></input>');
         });
-        $(upload).on('click', function (e) {
-            e.stopPropagation();
-        });
-        upload.click();
+        document.getElementById(upFileId).click();
     },
 
     // _createEditPanel: function () {
@@ -2861,13 +2860,15 @@ Menus.prototype = {
             }
             if (type === 'image' && menu.onClick) {
                 $elem.on('click', function (e) {
-                    console.log('e:' + e);
+                    console.log(e.target.tagName);
                     e.stopPropagation();
                     if (editor.selection.getRange() == null) {
                         return;
                     }
-                    // 在自定义事件中显示 panel
-                    menu.onClick(e);
+                    // 在自定义事件中显示 image
+                    if (e && e.target.tagName === 'I') {
+                        menu.onClick(e);
+                    }
                 });
             }
         });

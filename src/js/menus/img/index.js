@@ -4,13 +4,12 @@
 import $ from '../../util/dom-core.js'
 import { getRandom, arrForEach } from '../../util/util.js'
 
-const upFileId = getRandom('up-file')
+var upFileId = getRandom('up-file')
 
 // 构造函数
 function Image(editor) {
     this.editor = editor
     const imgMenuId = getRandom('w-e-img')
-
     this.$elem = $('<div class="w-e-menu" id="' + imgMenuId + '"><i class="w-e-icon-image"></i><div style="display:none"><input style="opacity: 0;" id="' + upFileId + '" type="file" accept="image/jpg,image/jpeg,image/png,image/gif,image/bmp" ></input></div></div>')
     editor.imgMenuId = imgMenuId
     this.type = 'image'
@@ -22,7 +21,7 @@ function Image(editor) {
 // 原型
 Image.prototype = {
     constructor: Image,
-    onClick: function() {
+    onClick: function () {
         const editor = this.editor
         const config = editor.config
         const uploadImg = editor.uploadImg
@@ -34,8 +33,9 @@ Image.prototype = {
             config.manualUpload()
             return
         }
-        var upload = document.getElementById(upFileId)
-        $(upload).on('change', function() {
+        const oldUploadId = upFileId
+        $('#' + oldUploadId).on('change', function (e) {
+            console.log('change e:' + JSON.stringify(e))
             const $file = $('#' + upFileId)
             const fileElem = $file[0]
 
@@ -44,11 +44,10 @@ Image.prototype = {
             if (fileList.length) {
                 uploadImg.uploadImg(fileList)
             }
+            upFileId = getRandom('up-file')
+            $(this).off('change').html('<input style="opacity: 0;" id="' + upFileId + '" type="file" accept="image/jpg,image/jpeg,image/png,image/gif,image/bmp" ></input>')
         })
-        $(upload).on('click', function(e) {
-            e.stopPropagation()
-        })
-        upload.click()
+        document.getElementById(upFileId).click()
     },
 
     // _createEditPanel: function () {
@@ -253,7 +252,7 @@ Image.prototype = {
     // },
 
     // 试图改变 active 状态
-    tryChangeActive: function(e) {
+    tryChangeActive: function (e) {
         const editor = this.editor
         const $elem = this.$elem
         if (editor._selectedImg) {
